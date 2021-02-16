@@ -59,9 +59,13 @@ class Tracker:
     def __init__(self, vp, nl, file_id):
         '''Tracker class initialisations'''
         nsp = str(date.today()) + '_' + file_id
-        self.save = os.path.join(gui.save_path, nsp)
+        self.save = os.path.join(gui.save_path, nsp) + '{}'.format('.txt')
         self.node_list = str(nl)
         self.cap = cv2.VideoCapture(str(vp))
+
+        #experiment meta-data
+        self.rat = input("Enter rat number: ")
+        self.date = input("Enter date of trial: ")
 
         self.paused = False
         self.frame = None
@@ -94,6 +98,9 @@ class Tracker:
         logtime = 0
         print('loading tracker...\n')
         time.sleep(2.0)
+
+        with open(self.save, 'a+') as file:
+        	file.write(f"Rat number: {self.rat} , Date: {self.date} \n")
 
         while True:
             if not self.paused:
@@ -145,8 +152,7 @@ class Tracker:
 
                 #condition to save/log data to file upon second press of 's' key
                 if save_flag / 2 == 1:
-                	fname = self.save + '{}'.format('.txt')
-                	self.save_to_file(fname)
+                	self.save_to_file(self.save)
                 	self.saved_nodes = []
                 	self.node_pos = []
                 	self.centroid_list = []
