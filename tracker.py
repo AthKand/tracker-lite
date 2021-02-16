@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 # @Author: Atharva Kand
 # @Date:   2020-04-06 17:20:05
-# @Last Modified by:  Atharva Kand
-
+# @Last Modified by:   Atharva Kand
 
 '''
 Title: Tracker
@@ -47,6 +46,14 @@ def points_dist(p1, p2):
     dist = math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
     return dist
 
+#convert time in milli seconds to -> hh:mm:ss,uuu format
+def convert_milli(time):
+	sec = (time / 1000) % 60
+	minute = (time / (1000*60)) % 60
+	hr = (time / (1000*60*60)) % 24
+
+	return f'{int(hr):02d}:{int(minute):02d}:{sec:.3f}'
+
 
 class Tracker:
     def __init__(self, vp, nl, file_id):
@@ -82,7 +89,6 @@ class Tracker:
     def run_vid(self):
         '''
         Frame by Frame looping of video
-        
         '''
         save_flag = 0
         logtime = 0
@@ -96,6 +102,8 @@ class Tracker:
                     self.paused = True
 
             start = time.time()
+
+            frame_time = self.cap.get(cv2.CAP_PROP_POS_MSEC)
             
             #process and display frame
             if self.frame is not None:
@@ -117,10 +125,11 @@ class Tracker:
                 logtime += rfps
                 if logtime >= 1:
                     if self.pos_centroid is not None:
+                    	converted_time = convert_milli(int(frame_time))
                     	if self.saved_nodes:
-                        	logger.info(f'The rat position is: {self.pos_centroid} @ {self.saved_nodes[-1]}')
+                        	logger.info(f'{converted_time} : The rat position is: {self.pos_centroid} @ {self.saved_nodes[-1]}')
                     	else:
-                    		logger.info(f'The rat position is: {self.pos_centroid}')
+                    		logger.info(f'{converted_time} : The rat position is: {self.pos_centroid}')
                     else:
                         logger.info('Rat not detected')
                     logtime = 0
@@ -314,12 +323,10 @@ if __name__ == "__main__":
 
     logfile_name = 'logs/log_{}_{}.log'.format(str(today), file_id)
 
-
     fh = logging.FileHandler(str(logfile_name))
-    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(message)s')
+    formatter = logging.Formatter('%(levelname)s : %(message)s')
     fh.setFormatter(formatter)
     logger.addHandler(fh) 
-
 
     node_list = Path('tools/node_list_new.csv').resolve()
     vid_path = gui.vpath
