@@ -3,6 +3,7 @@
 # @Date:   2020-04-06 17:20:05
 # @Last Modified by:   Atharva Kand
 
+
 '''
 Title: Tracker
 
@@ -128,7 +129,7 @@ class Tracker:
 
 
             #log present centroid position if program is in 'save mode'
-            if self.record_detections:
+            if self.record_detections and not self.paused:
                 logtime += rfps
                 if logtime >= 1:
                     if self.pos_centroid is not None:
