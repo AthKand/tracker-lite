@@ -4,6 +4,7 @@
 # @Last Modified by:   Atharva Kand
 
 
+
 '''
 Title: Tracker
 
@@ -96,7 +97,6 @@ class Tracker:
         Frame by Frame looping of video
         '''
         save_flag = 0
-        logtime = 0
         print('loading tracker...\n')
         time.sleep(2.0)
 
@@ -109,9 +109,8 @@ class Tracker:
                 if not ret:
                     self.paused = True
 
-            start = time.time()
-
             frame_time = self.cap.get(cv2.CAP_PROP_POS_MSEC)
+            self.frame_rate = self.cap.get(cv2.CAP_PROP_FPS)
             
             #process and display frame
             if self.frame is not None:
@@ -121,26 +120,16 @@ class Tracker:
                 self.annotate_frame(self.disp_frame)
                 cv2.imshow('Tracker', self.disp_frame)
 
-            end = time.time()
-            diff = end - start
-            fps = 1 / diff
-            rfps = round(fps / RT_FPS, 2)
-            self.frame_rate = rfps
-
-
             #log present centroid position if program is in 'save mode'
             if self.record_detections and not self.paused:
-                logtime += rfps
-                if logtime >= 1:
-                    if self.pos_centroid is not None:
-                    	converted_time = convert_milli(int(frame_time))
-                    	if self.saved_nodes:
-                        	logger.info(f'{converted_time} : The rat position is: {self.pos_centroid} @ {self.saved_nodes[-1]}')
-                    	else:
-                    		logger.info(f'{converted_time} : The rat position is: {self.pos_centroid}')
+                if self.pos_centroid is not None:
+                    converted_time = convert_milli(int(frame_time))
+                    if self.saved_nodes:
+                        logger.info(f'{converted_time} : The rat position is: {self.pos_centroid} @ {self.saved_nodes[-1]}')
                     else:
-                        logger.info('Rat not detected')
-                    logtime = 0
+                        logger.info(f'{converted_time} : The rat position is: {self.pos_centroid}')
+                else:
+                    logger.info('Rat not detected')
 
             key = cv2.waitKey(1) & 0xFF
             if key == ord('q'):
@@ -321,7 +310,7 @@ if __name__ == "__main__":
     enter = input('Enter unique file name: ')
     file_id = '' if not enter else enter
 
-    print('#\nLite Tracker version: v1.00\n#\n')
+    print('#\nLite Tracker version: v1.03\n#\n')
     import utils.gui as gui
 
     #logger intitialisations
